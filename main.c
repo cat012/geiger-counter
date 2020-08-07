@@ -1,8 +1,8 @@
 // main.c
-// 7-Aug-2020
+// 8-Aug-2020
 
 /*
-    Program space        used   DA6h (  3494) of  8000h bytes   ( 10.7%)
+    Program space        used   DD0h (  3536) of  8000h bytes   ( 10.8%)
     Data space           used    F6h (   246) of   600h bytes   ( 16.0%)
 */
 
@@ -19,7 +19,6 @@ char strbuff[64]; //string buffer
 
 volatile uint16_t pulsecnt=0;  //counter
 
-
 #define MAX_HVOLT  4150
 #define MIN_HVOLT  3850
 
@@ -28,7 +27,6 @@ volatile uint16_t pulsecnt=0;  //counter
 #define GEIGER_TIME  36
 
 uint16_t pulsebuff[GEIGER_TIME+1];  //pulse counter //[0]-current
-
 
 uint16_t highvolt=0;
 uint16_t battvolt=0;
@@ -188,7 +186,7 @@ static inline void screen_main(void)
     lcd_print(strbuff);
     //t2=debugcnt;
 
-    sprintf(strbuff,"%1u.%2u", battvolt/1000, (battvolt%1000)/10);
+    sprintf(strbuff,"%1u.%02u", battvolt/1000, (battvolt%1000)/10);
     //sprintf(strbuff,"%2lu ms", t2-t1);
     lcd_goto(1,0);
     lcd_print(strbuff);
