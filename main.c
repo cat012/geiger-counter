@@ -1,6 +1,10 @@
 // main.c
-// 15-Jul-2020
+// 7-Aug-2020
 
+/*
+    Program space        used   DCAh (  3530) of  8000h bytes   ( 10.8%)
+    Data space           used    FAh (   250) of   600h bytes   ( 16.3%)
+ */
 
 
 #include <stdio.h>
@@ -25,10 +29,15 @@ volatile uint16_t pulsecnt=0;  //counter
 
 uint16_t pulsebuff[GEIGER_TIME+1];  //pulse counter //[0]-current
 
+uint16_t highvolt=0;
+uint16_t battvolt=0;
+
 uint32_t doserate=0;  //dose rate, uR/h
 uint32_t maxrate=0;
 uint32_t dosetot=0;
 
+//uint32_t t1=0;
+//uint32_t t2=0;
 //volatile uint32_t debugcnt=0;
 
 volatile uint8_t syscnt=0;
@@ -169,6 +178,34 @@ static inline void doserate_reset(void)
 
 
 //-----------------------------------------------------------------------------
+static inline void screen_main(void)
+    {
+    sprintf(strbuff,"%6lu", doserate);
+    lcd_goto(0,2);
+    //t1=debugcnt;
+    lcd_print(strbuff);
+    //t2=debugcnt;
+
+    sprintf(strbuff,"%1u.%2u", battvolt/1000, (battvolt%1000)/10);
+    //sprintf(strbuff,"%2lu ms", t2-t1);
+    lcd_goto(1,0);
+    lcd_print(strbuff);
+    }
+
+
+//-----------------------------------------------------------------------------
+static inline void screen_second(void)
+    {
+    sprintf(strbuff,"%6lu", dosetot);
+    lcd_goto(0,2);
+    lcd_print(strbuff);
+    sprintf(strbuff,"%3u %2u", highvolt/10, pwm_read());
+    lcd_goto(1,0);
+    lcd_print(strbuff);
+    }
+
+
+//-----------------------------------------------------------------------------
 void main(void)
     {
     IRCF2=1; IRCF1=0; IRCF0=1; //111=8M 110=4M 101=2M 100=1M 011=500k 010=250k 001=125k 000=31k
@@ -255,11 +292,6 @@ void main(void)
 
     uint8_t scrupd=0;
     uint8_t scrmode=0;
-    uint16_t hvolt=0;
-    uint16_t bvolt=0;
-
-    //uint32_t t1=0;
-    //uint32_t t2=0;
 
     for(;;)
         {
@@ -267,11 +299,11 @@ void main(void)
             {
             syscnt=EVENT_PERIOD(200);
 
-            bvolt=ADC_BVOLT(get_adc(0,8));
-            hvolt=ADC_HVOLT(get_adc(1,8));
+            battvolt=ADC_BVOLT(get_adc(0,8));
+            highvolt=ADC_HVOLT(get_adc(1,8));
 
-            if(hvolt<=MIN_HVOLT) pwm_incr();
-            if(hvolt>=MAX_HVOLT) pwm_decr();
+            if(highvolt<=MIN_HVOLT) pwm_incr();
+            if(highvolt>=MAX_HVOLT) pwm_decr();
 
             scrupd=0;
             }
@@ -290,17 +322,8 @@ void main(void)
             {
             scrupd=1;
 
-            //sprintf(strbuff,"%2u%6lu", pwm_read(), doserate);
-            scrmode ? sprintf(strbuff,"D %6lu", dosetot) : sprintf(strbuff,"R %6lu", doserate);
-            lcd_goto(0,0);
-            //t1=debugcnt;
-            lcd_print(strbuff);
-            //t2=debugcnt;
-
-            //sprintf(strbuff,"%2lu ms", t2-t1);
-            sprintf(strbuff,"%3u %4u", hvolt/10, bvolt);
-            lcd_goto(1,0);
-            lcd_print(strbuff);
+            if(scrmode==0) screen_main();
+            if(scrmode==1) screen_second();
             }
 
         switch(button_check())
@@ -316,6 +339,9 @@ void main(void)
             case 1:
                 scrupd=0;
                 scrmode ? scrmode=0 : scrmode=1;
+
+                lcd_clear();
+
                 DLED_GREEN;
                 delay_ms(10);
                 DLED_OFF;
