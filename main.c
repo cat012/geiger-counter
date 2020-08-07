@@ -2,9 +2,9 @@
 // 7-Aug-2020
 
 /*
-    Program space        used   DCAh (  3530) of  8000h bytes   ( 10.8%)
-    Data space           used    FAh (   250) of   600h bytes   ( 16.3%)
- */
+    Program space        used   DA6h (  3494) of  8000h bytes   ( 10.7%)
+    Data space           used    F6h (   246) of   600h bytes   ( 16.0%)
+*/
 
 
 #include <stdio.h>
@@ -29,11 +29,14 @@ volatile uint16_t pulsecnt=0;  //counter
 
 uint16_t pulsebuff[GEIGER_TIME+1];  //pulse counter //[0]-current
 
+
 uint16_t highvolt=0;
 uint16_t battvolt=0;
 
+uint32_t pulsetot=0;  //counter
+
 uint32_t doserate=0;  //dose rate, uR/h
-uint32_t maxrate=0;
+//uint32_t maxrate=0;
 uint32_t dosetot=0;
 
 //uint32_t t1=0;
@@ -149,8 +152,6 @@ static void pwm_decr(void)
 //-----------------------------------------------------------------------------
 static inline void doserate_calc(void)
     {
-    static uint32_t pulsetot=0;  //counter
-
     pulsebuff[0]=pulsecnt;
     pulsecnt=0;
 
@@ -162,7 +163,7 @@ static inline void doserate_calc(void)
     for(uint8_t k=GEIGER_TIME; k>0; k--) tmprate+=pulsebuff[k]; //calc dose rate
     if(tmprate>999999) tmprate=999999; //overflow
     doserate=tmprate;
-    if(tmprate>maxrate) maxrate=tmprate;   //peak
+    //if(tmprate>maxrate) maxrate=tmprate;   //peak
     dosetot=(pulsetot*GEIGER_TIME/3600);   //dose
     }
 
@@ -172,7 +173,8 @@ static inline void doserate_reset(void)
     {
     for(uint8_t i=0; i<GEIGER_TIME+1; i++) pulsebuff[i]=0;
     doserate=0;
-    maxrate=0;
+    //maxrate=0;
+    pulsetot=0;
     dosetot=0;
     }
 
