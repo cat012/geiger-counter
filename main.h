@@ -1,6 +1,7 @@
 // main.h
 // PIC18F4520
-// 23-May-2020
+//
+// 04-Sep-2020
 
 
 #ifndef MAIN_H
@@ -18,11 +19,17 @@
 // CONFIG2L
 #pragma config PWRT = OFF       // Power-up Timer Enable bit (PWRT disabled)
 #pragma config BOREN = ON       // Brown-out Reset Enable bits (Brown-out Reset enabled and controlled by software (SBOREN is enabled))
-#pragma config BORV = 2         // Brown Out Reset Voltage bits (3==Minimum setting)
+#pragma config BORV = 3         // Brown Out Reset Voltage bits (3==Minimum setting)
+/*
+BORV=11 2.00-2.11-2.22 V
+BORV=10 2.65-2.79-2.93 V
+BORV=01 4.11-4.33-4.55 V
+BORV=00 4.36-4.59-4.82 V
+*/
 
 // CONFIG2H
 #pragma config WDT = OFF        // Watchdog Timer Enable bit (WDT disabled (control is placed on the SWDTEN bit))
-#pragma config WDTPS = 1024     // Watchdog Timer Postscale Select bits (1:1024)
+#pragma config WDTPS = 2048     // Watchdog Timer Postscale Select bits (1-32768)
 
 // CONFIG3H
 #pragma config CCP2MX = PORTBE  // CCP2 MUX bit (CCP2 input/output is multiplexed with RB3)
@@ -149,6 +156,9 @@
 #define DLED_RED    DLED_LAT_0=0; DLED_TRIS_0=0; DLED_LAT_1=1; DLED_TRIS_1=0
 #define DLED_GREEN  DLED_LAT_0=1; DLED_TRIS_0=0; DLED_LAT_1=0; DLED_TRIS_1=0
 
+#define DEBUG_GREEN_BLINK  DLED_GREEN; delay_ms(10); DLED_OFF
+#define DEBUG_RED_BLINK    DLED_RED; delay_ms(10); DLED_OFF
+
 
 #define PULSEOUT_TRIS  TRISBbits.RB3
 #define PULSEOUT_LAT   LATBbits.LATB3
@@ -201,9 +211,6 @@
 #define TMR0_OVF_FREQ     100U
 #define TMR0_OVF_PRELOAD  (65536U-(((_XTAL_FREQ/4U)/2U)/TMR0_OVF_FREQ))
 
-#define TMR0_PERIOD_MS  (1000U/TMR0_OVF_FREQ)
-#define EVENT_PERIOD(x)  ((x)/TMR0_PERIOD_MS)
-
 
 /* timer 1 prescaler settings */
 #define TMR1_PRESCALER_8  0b00110000
@@ -233,8 +240,8 @@
 
 #define TMR3_PRESCALER  TMR3_PRESCALER_1
 
-#define TMR3_OVF_FREQ     100UL
-#define TMR3_OVF_PRELOAD  (65536U-(((_XTAL_FREQ/4UL)/1UL)/TMR3_OVF_FREQ))
+#define TMR3_OVF_FREQ     1000U
+#define TMR3_OVF_PRELOAD  (65536U-(((_XTAL_FREQ/4U)/1U)/TMR3_OVF_FREQ))
 
 
 //NOTE
@@ -244,5 +251,4 @@
 
 
 #endif /* MAIN_H */
-
 

@@ -1,5 +1,5 @@
 // lcd.c
-// 17-May-2020
+// 2-Sep-2020
 
 
 #include "lcd.h"
@@ -91,6 +91,15 @@ void lcd_init(void)
     lcd_custom(custchar);
     }
 
+//-----------------------------------------------------------------------------
+void lcd_cursor(uint8_t enable, uint8_t blink)
+    {
+    COMMAND_MODE;
+
+    lcd_bus(0b0000);
+    lcd_bus(0b1100 | (enable&1)<<1 | (blink&1));
+    __delay_us(50);
+    }
 
 //-----------------------------------------------------------------------------
 void lcd_clear(void) //clear screen
